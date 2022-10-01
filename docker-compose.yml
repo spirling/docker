@@ -1,0 +1,66 @@
+version: '3.1'
+
+services:
+  spirling_php:
+    container_name: spirling_php
+    build:
+      context: ./php/8.1
+      args:
+      - INSTALL_XDEBUG=${INSTALL_XDEBUG}
+      - XDEBUG_HOST=${XDEBUG_HOST}
+      - SERVER_NAME=${SERVER_NAME}
+      - USER_ID=${USER_ID}
+      - GROUP_ID=${GROUP_ID}
+    restart: always
+    depends_on:
+      - spirling_mysql
+    links:
+      - spirling_mysql
+    environment:
+      XDEBUG_CONFIG: "remote_host=${XDEBUG_HOST}"
+      PHP_IDE_CONFIG: "serverName=${SERVER_NAME}"
+    volumes:
+      - "./data/www:/var/www"
+    networks:
+      - spirling-network
+
+  spirling_nginx:
+    container_name: spirling_nginx
+    image: nginx:1.23
+    restart: always
+    ports:
+      - "8000:80"
+      - "443:443"
+    volumes:
+      - "./hosts:/etc/nginx/conf.d"
+      - "./data/www:/var/www"
+      - "./var/logs/nginx:/var/log/nginx"
+    depends_on:
+      - spirling_php
+    networks:
+      spirling-network:
+        aliases:
+          - dev.spirling.loc
+
+  spirling_mysql:
+    container_name: spirling_mysql
+    image: mysql:8.0
+    restart: always
+    volumes:
+      - "./data/mysql:/var/lib/mysql"
+      - "./var/logs/mysql:/var/log/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      TZ: Europe/Kiev
+    ports:
+      - "3306:3306"
+    networks:
+      - spirling-network
+
+networks:
+  spirling-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.220.0/28
