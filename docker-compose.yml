@@ -1,10 +1,10 @@
-version: '3.1'
+version: '3.8'
 
 services:
-  spirling_php:
-    container_name: spirling_php
+  spirling_php82:
+    container_name: spirling_php82
     build:
-      context: ./php/8.1
+      context: ./services/php/8.2
       args:
       - INSTALL_XDEBUG=${INSTALL_XDEBUG}
       - XDEBUG_HOST=${XDEBUG_HOST}
@@ -26,15 +26,15 @@ services:
 
   spirling_nginx:
     container_name: spirling_nginx
-    image: nginx:1.23
+    image: nginx
     restart: always
     ports:
-      - "8000:80"
-      - "443:443"
+      - "88:80"
+      - "1443:443"
     volumes:
-      - "./hosts:/etc/nginx/conf.d"
+      - "./config/nginx:/etc/nginx/conf.d"
       - "./data/www:/var/www"
-      - "./var/logs/nginx:/var/log/nginx"
+      - "./var/log/nginx:/var/log/nginx"
     depends_on:
       - spirling_php
     networks:
