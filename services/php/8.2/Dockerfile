@@ -41,7 +41,6 @@ RUN docker-php-ext-install opcache \
 RUN pecl install yaml && docker-php-ext-enable yaml
 
 ARG INSTALL_XDEBUG=false
-ARG XDEBUG_HOST=spirling.loc
 
 # Install Xdebug
 RUN if [ ${INSTALL_XDEBUG} = true ]; then \
