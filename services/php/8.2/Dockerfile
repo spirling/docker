@@ -36,7 +36,9 @@ RUN docker-php-ext-install opcache \
     && docker-php-ext-install sysvshm \
     && docker-php-ext-install xml \
     && docker-php-ext-install zip \
-    && docker-php-ext-install gettext 
+    && docker-php-ext-install gettext \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install intl
 
 RUN pecl install yaml && docker-php-ext-enable yaml
 
