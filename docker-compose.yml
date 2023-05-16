@@ -24,6 +24,27 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
 
+  spirling_php74:
+    container_name: spirling_php74
+    build:
+      context: ./services/php/7.4
+      args:
+      - INSTALL_XDEBUG=${INSTALL_XDEBUG}
+      - SERVER_NAME=${SERVER_NAME}
+      - USER_ID=${USER_ID}
+      - GROUP_ID=${GROUP_ID}
+    restart: always
+    depends_on:
+      - spirling_mysql
+    links:
+      - spirling_mysql
+    environment:
+      PHP_IDE_CONFIG: "serverName=${SERVER_NAME}"
+    volumes:
+      - "$WEB_ROOT:/var/www"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
   spirling_nginx:
     container_name: spirling_nginx
     image: nginx
@@ -33,6 +54,7 @@ services:
       - "1443:443"
     volumes:
       - "./config/nginx:/etc/nginx/conf.d"
+      - "./config/ssl:/etc/nginx/ssl"
       - "${WEB_ROOT}:/var/www"
       - "./var/log/nginx:/var/log/nginx"
     depends_on:
