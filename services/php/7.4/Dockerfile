@@ -4,6 +4,7 @@ ARG USER_ID
 ARG GROUP_ID
 
 RUN apt-get update && apt-get install -y --no-install-recommends git zip \
+    cron \
     curl \
     wget \
     libfreetype6-dev \
@@ -46,7 +47,7 @@ ARG INSTALL_XDEBUG=false
 
 # Install Xdebug
 RUN if [ ${INSTALL_XDEBUG} = true ]; then \
-    pecl install xdebug-2.9.0 && docker-php-ext-enable xdebug \
+    pecl install xdebug-3.1.2 && docker-php-ext-enable xdebug \
 ;fi
 
 # Composer setup

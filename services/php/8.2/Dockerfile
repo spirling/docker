@@ -4,6 +4,7 @@ ARG USER_ID
 ARG GROUP_ID
 
 RUN apt-get update && apt-get install -y --no-install-recommends git zip \
+    cron \
     curl \
     wget \
     libfreetype6-dev \
@@ -18,7 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends git zip \
     libzip-dev \
     jq \
     zlib1g-dev  \
-    libicu-dev
+    libicu-dev \
+    nano
 
 RUN docker-php-ext-install opcache \
     && docker-php-ext-install bcmath \
@@ -53,8 +55,12 @@ RUN if [ ${INSTALL_XDEBUG} = true ]; then \
 RUN wget https://getcomposer.org/installer -O - -q \
     | php -- --install-dir=/usr/local/bin --filename=composer --quiet
 
-WORKDIR /var/www
+# Add user and group
+RUN groupadd -r -g ${GROUP_ID} spirling \
+    && useradd -r -u ${USER_ID} -g spirling spirling
 
 USER "${USER_ID}:${GROUP_ID}"
+
+WORKDIR /var/www
 
 CMD bash -c "php-fpm"

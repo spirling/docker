@@ -1,74 +1,114 @@
 version: '3.8'
-name: spirling
+
+name: 'spirling'
 
 services:
-  spirling_php82:
-    container_name: spirling_php82
+  spirling_php_74:
+    container_name: spirling_php_74
+    hostname: spirling.loc
     build:
-      context: ./services/php/8.2
+      context: "./services/php/7.4"
       args:
-      - INSTALL_XDEBUG=${INSTALL_XDEBUG}
-      - SERVER_NAME=${SERVER_NAME}
-      - USER_ID=${USER_ID}
-      - GROUP_ID=${GROUP_ID}
+        - INSTALL_XDEBUG=${INSTALL_XDEBUG:-true}
+        - USER_ID=${USER_ID:-1000}
+        - GROUP_ID=${GROUP_ID:-1000}
     restart: always
-    depends_on:
-      - spirling_mysql
-    links:
-      - spirling_mysql
-    environment:
-      PHP_IDE_CONFIG: "serverName=${SERVER_NAME}"
     volumes:
-      - "$WEB_ROOT:/var/www"
-      - ./config/php/8.2/php.ini:/usr/local/etc/php/php.ini
+      - "${WEB_ROOT:-/var/www}:/var/www"
+      - "./config/php/7.4/php.ini:/usr/local/etc/php/php.ini"
     extra_hosts:
       - host.docker.internal:host-gateway
 
-  spirling_php74:
-    container_name: spirling_php74
+  spirling_php_80:
+    container_name: spirling_php_80
+    hostname: spirling.loc
     build:
-      context: ./services/php/7.4
+      context: "./services/php/8.0"
       args:
-      - INSTALL_XDEBUG=${INSTALL_XDEBUG}
-      - SERVER_NAME=${SERVER_NAME}
-      - USER_ID=${USER_ID}
-      - GROUP_ID=${GROUP_ID}
+        - INSTALL_XDEBUG=${INSTALL_XDEBUG:-true}
+        - USER_ID=${USER_ID:-1000}
+        - GROUP_ID=${GROUP_ID:-1000}
     restart: always
-    depends_on:
-      - spirling_mysql
-    links:
-      - spirling_mysql
-    environment:
-      PHP_IDE_CONFIG: "serverName=${SERVER_NAME}"
     volumes:
-      - "$WEB_ROOT:/var/www"
+      - "${WEB_ROOT:-/var/www}:/var/www"
+      - "./config/php/8.0/php.ini:/usr/local/etc/php/php.ini"
     extra_hosts:
       - host.docker.internal:host-gateway
 
-  spirling_nginx:
-    container_name: spirling_nginx
-    image: nginx
+  spirling_php_82:
+    container_name: spirling_php_82
+    hostname: spirling.loc
+    build:
+      context: "./services/php/8.2"
+      args:
+        - INSTALL_XDEBUG=${INSTALL_XDEBUG:-true}
+        - USER_ID=${USER_ID:-1000}
+        - GROUP_ID=${GROUP_ID:-1000}
     restart: always
+    volumes:
+      - "${WEB_ROOT:-/var/www}:/var/www"
+      - "./config/php/8.2/php.ini:/usr/local/etc/php/php.ini"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  spirling_webserver:
+    container_name: spirling_webserver
+    hostname: spirling.loc
+    build:
+      context: "./services/nginx"
+    restart: always
+    volumes:
+      - "${WEB_ROOT:-/var/www}:/var/www"
+      - "./config/nginx/conf.d:/etc/nginx/conf.d"
+      - "./config/nginx/snippets:/etc/nginx/snippets"
+      - "./config/nginx/ssl:/etc/nginx/ssl"
+      - "./log/nginx:/var/log/nginx"
     ports:
-      - "88:80"
-      - "1443:443"
-    volumes:
-      - "./config/nginx:/etc/nginx/conf.d"
-      - "./config/ssl:/etc/nginx/ssl"
-      - "${WEB_ROOT}:/var/www"
-      - "./var/log/nginx:/var/log/nginx"
-    depends_on:
-      - spirling_php82
+      - "80:80"
+      - "443:443"
+      - "8074:8074"
+      - "8474:8474"
+      - "8080:8080"
+      - "8480:8480"
+      - "8082:8082"
+      - "8482:8482"
+      - "18074:18074"
+      - "18474:18474"
+      - "18080:18080"
+      - "18480:18480"
+      - "18082:18082"
+      - "18482:18482"
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
-  spirling_mysql:
-    container_name: spirling_mysql
+  spirling_mysql_57:
+    container_name: spirling_mysql_57
+    image: mysql:5.7
+    restart: always
+    volumes:
+      - "./data/mysql/5.7:/var/lib/mysql"
+      - "./log/mysql/5.7:/var/log/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      TZ: Europe/Kiev
+    ports:
+      - "3357:3306"
+      - "33570:33060"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  spirling_mysql_80:
+    container_name: spirling_mysql_80
     image: mysql:8.0
     restart: always
     volumes:
-      - "./data/mysql:/var/lib/mysql"
-      - "./var/logs/mysql:/var/log/mysql"
+      - "./data/mysql/8.0:/var/lib/mysql"
+      - "./log/mysql/8.0:/var/log/mysql"
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
       TZ: Europe/Kiev
     ports:
-      - "3310:3306"
+      - "3380:3306"
+      - "33800:33060"
+    extra_hosts:
+      - host.docker.internal:host-gateway

@@ -1,3 +1,2 @@
 .env
-var/log/nginx
-var/cache
+.idea
